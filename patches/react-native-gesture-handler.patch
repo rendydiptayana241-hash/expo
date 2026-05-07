@@ -1,0 +1,175 @@
+diff --git a/lib/commonjs/handlers/gestures/GestureDetector/useDetectorUpdater.js b/lib/commonjs/handlers/gestures/GestureDetector/useDetectorUpdater.js
+index 27a4164f4082a465709f7d20e8d80c9e49bf849e..cda7cb38e79e6bc67d1e1341ad77196752d73c20 100644
+--- a/lib/commonjs/handlers/gestures/GestureDetector/useDetectorUpdater.js
++++ b/lib/commonjs/handlers/gestures/GestureDetector/useDetectorUpdater.js
+@@ -24,7 +24,6 @@ function useDetectorUpdater(state, preparedGesture, gesturesToAttach, gestureCon
+     const viewTag = (0, _findNodeHandle.default)(state.viewRef);
+     const didUnderlyingViewChange = viewTag !== state.previousViewTag;
+     if (didUnderlyingViewChange || (0, _needsToReattach.needsToReattach)(preparedGesture, gesturesToAttach)) {
+-      (0, _utils.validateDetectorChildren)(state.viewRef);
+       (0, _dropHandlers.dropHandlers)(preparedGesture);
+       (0, _attachHandlers.attachHandlers)({
+         preparedGesture,
+diff --git a/lib/commonjs/handlers/gestures/GestureDetector/utils.js b/lib/commonjs/handlers/gestures/GestureDetector/utils.js
+index 28412d948d51b46566ad0fc97049603b79b81200..cd35ef778e3b58178fe5624ec90ed0ac9de38c3c 100644
+--- a/lib/commonjs/handlers/gestures/GestureDetector/utils.js
++++ b/lib/commonjs/handlers/gestures/GestureDetector/utils.js
+@@ -8,8 +8,6 @@ exports.checkGestureCallbacksForWorklets = checkGestureCallbacksForWorklets;
+ exports.extractGestureRelations = extractGestureRelations;
+ exports.useForceRender = useForceRender;
+ exports.useWebEventHandlers = useWebEventHandlers;
+-exports.validateDetectorChildren = validateDetectorChildren;
+-var _reactNative = require("react-native");
+ var _utils = require("../../../utils");
+ var _gesture = require("../gesture");
+ var _FlingGestureHandler = require("../../FlingGestureHandler");
+@@ -21,7 +19,6 @@ var _hoverGesture = require("../hoverGesture");
+ var _NativeViewGestureHandler = require("../../NativeViewGestureHandler");
+ var _gestureHandlerCommon = require("../../gestureHandlerCommon");
+ var _EnableNewWebImplementation = require("../../../EnableNewWebImplementation");
+-var _RNRenderer = require("../../../RNRenderer");
+ var _react = require("react");
+ var _reanimatedWrapper = require("../reanimatedWrapper");
+ var _eventReceiver = require("../eventReceiver");
+@@ -89,50 +86,6 @@ function checkGestureCallbacksForWorklets(gesture) {
+   }
+ }
+ 
+-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+-function validateDetectorChildren(ref) {
+-  // Finds the first native view under the Wrap component and traverses the fiber tree upwards
+-  // to check whether there is more than one native view as a pseudo-direct child of GestureDetector
+-  // i.e. this is not ok:
+-  //            Wrap
+-  //             |
+-  //            / \
+-  //           /   \
+-  //          /     \
+-  //         /       \
+-  //   NativeView  NativeView
+-  //
+-  // but this is fine:
+-  //            Wrap
+-  //             |
+-  //         NativeView
+-  //             |
+-  //            / \
+-  //           /   \
+-  //          /     \
+-  //         /       \
+-  //   NativeView  NativeView
+-  if (__DEV__ && _reactNative.Platform.OS !== 'web') {
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-    const wrapType =
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-    ref._reactInternals.elementType;
+-
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-    let instance = _RNRenderer.RNRenderer.findHostInstance_DEPRECATED(ref)._internalFiberInstanceHandleDEV;
+-
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-    while (instance && instance.elementType !== wrapType) {
+-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-      if (instance.sibling) {
+-        throw new Error('GestureDetector has more than one native view as its children. This can happen if you are using a custom component that renders multiple views, like React.Fragment. You should wrap content of GestureDetector with a <View> or <Animated.View>.');
+-      }
+-
+-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+-      instance = instance.return;
+-    }
+-  }
+-}
+ function useForceRender() {
+   const [renderState, setRenderState] = (0, _react.useState)(false);
+   const forceRender = (0, _react.useCallback)(() => {
+diff --git a/lib/module/handlers/gestures/GestureDetector/useDetectorUpdater.js b/lib/module/handlers/gestures/GestureDetector/useDetectorUpdater.js
+index c8e3ae2f4924b3ecf7b117914b502f995b8dd2fb..1fd877a6adf77ed17edbe79c301eda553c4a2c45 100644
+--- a/lib/module/handlers/gestures/GestureDetector/useDetectorUpdater.js
++++ b/lib/module/handlers/gestures/GestureDetector/useDetectorUpdater.js
+@@ -5,7 +5,7 @@ import { attachHandlers } from './attachHandlers';
+ import { updateHandlers } from './updateHandlers';
+ import { needsToReattach } from './needsToReattach';
+ import { dropHandlers } from './dropHandlers';
+-import { useForceRender, validateDetectorChildren } from './utils';
++import { useForceRender } from './utils';
+ import findNodeHandle from '../../../findNodeHandle';
+ 
+ // Returns a function that's responsible for updating the attached gestures
+@@ -20,7 +20,6 @@ export function useDetectorUpdater(state, preparedGesture, gesturesToAttach, ges
+     const viewTag = findNodeHandle(state.viewRef);
+     const didUnderlyingViewChange = viewTag !== state.previousViewTag;
+     if (didUnderlyingViewChange || needsToReattach(preparedGesture, gesturesToAttach)) {
+-      validateDetectorChildren(state.viewRef);
+       dropHandlers(preparedGesture);
+       attachHandlers({
+         preparedGesture,
+diff --git a/lib/module/handlers/gestures/GestureDetector/utils.js b/lib/module/handlers/gestures/GestureDetector/utils.js
+index 9c752528da231b78c8bf0a37bf5885b47434755c..88fb00a61d322c55f7565d9108d1dbc9614c7689 100644
+--- a/lib/module/handlers/gestures/GestureDetector/utils.js
++++ b/lib/module/handlers/gestures/GestureDetector/utils.js
+@@ -1,6 +1,5 @@
+ "use strict";
+ 
+-import { Platform } from 'react-native';
+ import { isTestEnv, tagMessage } from '../../../utils';
+ import { BaseGesture } from '../gesture';
+ import { flingGestureHandlerProps } from '../../FlingGestureHandler';
+@@ -12,7 +11,6 @@ import { hoverGestureHandlerProps } from '../hoverGesture';
+ import { nativeViewGestureHandlerProps } from '../../NativeViewGestureHandler';
+ import { baseGestureHandlerWithDetectorProps } from '../../gestureHandlerCommon';
+ import { isNewWebImplementationEnabled } from '../../../EnableNewWebImplementation';
+-import { RNRenderer } from '../../../RNRenderer';
+ import { useCallback, useRef, useState } from 'react';
+ import { Reanimated } from '../reanimatedWrapper';
+ import { onGestureHandlerEvent } from '../eventReceiver';
+@@ -80,50 +78,6 @@ export function checkGestureCallbacksForWorklets(gesture) {
+   }
+ }
+ 
+-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+-export function validateDetectorChildren(ref) {
+-  // Finds the first native view under the Wrap component and traverses the fiber tree upwards
+-  // to check whether there is more than one native view as a pseudo-direct child of GestureDetector
+-  // i.e. this is not ok:
+-  //            Wrap
+-  //             |
+-  //            / \
+-  //           /   \
+-  //          /     \
+-  //         /       \
+-  //   NativeView  NativeView
+-  //
+-  // but this is fine:
+-  //            Wrap
+-  //             |
+-  //         NativeView
+-  //             |
+-  //            / \
+-  //           /   \
+-  //          /     \
+-  //         /       \
+-  //   NativeView  NativeView
+-  if (__DEV__ && Platform.OS !== 'web') {
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-    const wrapType =
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-    ref._reactInternals.elementType;
+-
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+-    let instance = RNRenderer.findHostInstance_DEPRECATED(ref)._internalFiberInstanceHandleDEV;
+-
+-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-    while (instance && instance.elementType !== wrapType) {
+-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+-      if (instance.sibling) {
+-        throw new Error('GestureDetector has more than one native view as its children. This can happen if you are using a custom component that renders multiple views, like React.Fragment. You should wrap content of GestureDetector with a <View> or <Animated.View>.');
+-      }
+-
+-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+-      instance = instance.return;
+-    }
+-  }
+-}
+ export function useForceRender() {
+   const [renderState, setRenderState] = useState(false);
+   const forceRender = useCallback(() => {
