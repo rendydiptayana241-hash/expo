@@ -1,0 +1,9 @@
+{
+  "libraryVersion": "4.3.0",
+  "reactNativeVersion": "0.85.3",
+  "variant": "release",
+  "abis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64"],
+  "soFiles": ["libreanimated.so"],
+  "stripped": true,
+  "cachedAt": "2026-05-08T13:06:10.143655Z"
+}
