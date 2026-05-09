@@ -12,6 +12,8 @@
 
 ### 💡 Others
 
+- Migrated `Fetch` to the single-payload `SharedObject.emit` API. ([#45596](https://github.com/expo/expo/pull/45596) by [@tsapeta](https://github.com/tsapeta))
+
 ## 56.0.0-preview.7 — 2026-05-08
 
 ### 🐛 Bug fixes
