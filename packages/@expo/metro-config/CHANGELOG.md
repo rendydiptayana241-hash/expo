@@ -13,6 +13,7 @@
 ### 💡 Others
 
 - Bump to `postcss@^8.5.14` ([#45626](https://github.com/expo/expo/pull/45626) by [@kitten](https://github.com/kitten))
+- Switch to `msgpackr`-backed binary file store
 
 ## 56.0.5 — 2026-05-08
 
