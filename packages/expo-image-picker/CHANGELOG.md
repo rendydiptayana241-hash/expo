@@ -10,6 +10,8 @@
 
 ### 💡 Others
 
+- [ios] Fix broken bounds when cropping images when launching with `launchCameraAsync`. ([#45554](https://github.com/expo/expo/pull/45554) by [@behenate](https://github.com/behenate))
+
 ## 56.0.0 — 2026-05-05
 
 ### 🛠 Breaking changes
