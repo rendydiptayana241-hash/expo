@@ -1,10 +1,10 @@
 import assert from 'assert';
-import openBrowserAsync from 'better-opn';
 import http from 'http';
 import type { Socket } from 'node:net';
 import querystring from 'querystring';
 
 import * as Log from '../../log';
+import { openBrowserAsync } from '../../utils/open';
 
 export async function getSessionUsingBrowserAuthFlowAsync({
   expoWebsiteUrl,
