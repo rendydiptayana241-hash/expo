@@ -1454,13 +1454,6 @@ export class MetroBundlerDevServer extends BundlerDevServer {
                 }
               }
             }
-
-            // Handle loader file changes for HMR
-            if (exp.extra?.router?.unstable_useServerDataLoaders) {
-              for (const change of changes.modifiedFiles) {
-                this.handleLoaderFileChange(change[0]);
-              }
-            }
           }
         );
       }
@@ -1873,9 +1866,6 @@ export class MetroBundlerDevServer extends BundlerDevServer {
       });
 
       if (routeModule.loader) {
-        // Register this module for loader HMR
-        this.setupLoaderHmr(modulePath);
-
         const maybeResponse = await routeModule.loader(request, route.params);
 
         let data: unknown;
@@ -1972,33 +1962,6 @@ export class MetroBundlerDevServer extends BundlerDevServer {
     };
 
     this.registerSsrHmrAsync(url.toString(), onReload);
-  }
-
-  private watchedLoaderFiles: Set<string> = new Set();
-
-  private setupLoaderHmr(modulePath: string) {
-    if (this.watchedLoaderFiles.has(modulePath)) {
-      return;
-    }
-    this.watchedLoaderFiles.add(modulePath);
-
-    debug('[Loader HMR] Registering loader file for HMR:', modulePath);
-  }
-
-  private handleLoaderFileChange(changedFilePath: string) {
-    for (const loaderPath of this.watchedLoaderFiles) {
-      const possibleExtensions = ['.tsx', '.ts', '.jsx', '.js'];
-      const isLoaderFile = possibleExtensions.some(
-        (ext) => changedFilePath === loaderPath + ext || changedFilePath === loaderPath
-      );
-
-      if (isLoaderFile) {
-        debug('[Loader HMR] Loader file changed, triggering reload:', changedFilePath);
-        this.broadcastMessage('sendDevCommand', {
-          name: 'reload',
-        });
-      }
-    }
   }
 
   // Direct Metro access
