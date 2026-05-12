@@ -1,7 +1,7 @@
 'use client';
 
 import type { LoaderFunction } from 'expo-server';
-import React, { use, useMemo } from 'react';
+import React, { use, useMemo, useSyncExternalStore } from 'react';
 
 import { LocalRouteParamsContext, useContextKey } from './Route';
 import { INTERNAL_SLOT_NAME } from './constants';
@@ -376,6 +376,12 @@ type LoaderFunctionResult<T extends LoaderFunction<any>> =
 export function useLoaderData<T extends LoaderFunction<any> = any>(): LoaderFunctionResult<T> {
   const serverDataLoaderContext = use(ServerDataLoaderContext);
   const loaderCache = use(LoaderCacheContext);
+
+  // Subscribe before any early returns so a later `loader-invalidate` re-renders this hook even
+  // when the initial render was satisfied by `ServerDataLoaderContext` or `__EXPO_ROUTER_LOADER_DATA__`.
+  // Returning early before subscribing would also change hook order on the next render once
+  // invalidation deletes the injected global.
+  useSyncExternalStore(loaderCache.subscribe, loaderCache.getSnapshot, loaderCache.getSnapshot);
 
   const stateForPath = useStateForPath();
   const contextKey = useContextKey();
