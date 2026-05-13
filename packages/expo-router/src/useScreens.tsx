@@ -30,6 +30,7 @@ import {
 } from './react-navigation/native';
 import type { NativeStackNavigationEventMap } from './react-navigation/native-stack';
 import type { UnknownOutputParams } from './types';
+import { isRoutePreloadedInStack } from './utils/stack';
 import { EmptyRoute } from './views/EmptyRoute';
 import {
   SuspenseFallback as DefaultSuspenseFallback,
@@ -364,7 +365,7 @@ export function getQualifiedRouteComponent(value: RouteNode) {
       <Route node={value} params={route?.params}>
         <SuspenseFallbackContext value={providedSuspenseFallback}>
           {unstable_navigationEvents.isEnabled() && isRouteType && hasRouteKey && (
-            <AnalyticsListeners navigation={navigation} screenId={route.key} />
+            <AnalyticsListeners navigation={navigation} screenId={route.key} route={route} />
           )}
           <ZoomTransitionTargetContextProvider route={route}>
             <ZoomTransitionEnabler route={route} />
@@ -400,11 +401,14 @@ export function getQualifiedRouteComponent(value: RouteNode) {
 function AnalyticsListeners({
   navigation,
   screenId,
+  route,
 }: {
   navigation: EventConsumer<EventMapBase> & {
     isFocused(): boolean;
+    getState(): NavigationState | undefined;
   };
   screenId: string;
+  route: { key: string };
 }) {
   const isFirstRenderRef = React.useRef(true);
   const hasBlurredRef = React.useRef(true);
@@ -412,8 +416,8 @@ function AnalyticsListeners({
 
   if (isFirstRenderRef.current) {
     isFirstRenderRef.current = false;
-    if (routeInfo) {
-      unstable_navigationEvents.emit('pageWillRender', {
+    if (routeInfo && isRoutePreloadedInStack(navigation.getState(), route)) {
+      unstable_navigationEvents.emit('pagePreloaded', {
         pathname: routeInfo.pathname,
         params: routeInfo.params,
         screenId,

@@ -56,6 +56,7 @@ const navigationEvents_1 = require("./navigationEvents");
 const navigationParams_1 = require("./navigationParams");
 const primitives_1 = require("./primitives");
 const native_1 = require("./react-navigation/native");
+const stack_1 = require("./utils/stack");
 const EmptyRoute_1 = require("./views/EmptyRoute");
 const SuspenseFallback_1 = require("./views/SuspenseFallback");
 const Try_1 = require("./views/Try");
@@ -248,7 +249,7 @@ function getQualifiedRouteComponent(value) {
         }, [navigation]);
         const isRouteType = value.type === 'route';
         const hasRouteKey = !!route?.key;
-        return ((0, jsx_runtime_1.jsx)(Route_1.Route, { node: value, params: route?.params, children: (0, jsx_runtime_1.jsxs)(Route_1.SuspenseFallbackContext, { value: providedSuspenseFallback, children: [navigationEvents_1.unstable_navigationEvents.isEnabled() && isRouteType && hasRouteKey && ((0, jsx_runtime_1.jsx)(AnalyticsListeners, { navigation: navigation, screenId: route.key })), (0, jsx_runtime_1.jsxs)(zoom_transition_context_providers_1.ZoomTransitionTargetContextProvider, { route: route, children: [(0, jsx_runtime_1.jsx)(ZoomTransitionEnabler_1.ZoomTransitionEnabler, { route: route }), (0, jsx_runtime_1.jsx)(react_2.default.Suspense, { name: route ? `Route(${route.name})` : undefined, fallback: (0, jsx_runtime_1.jsx)(ResolvedSuspenseFallback, { route: value.contextKey, params: (route?.params ?? {}) }), children: (0, jsx_runtime_1.jsx)(WrappedScreenComponent, { ...props, 
+        return ((0, jsx_runtime_1.jsx)(Route_1.Route, { node: value, params: route?.params, children: (0, jsx_runtime_1.jsxs)(Route_1.SuspenseFallbackContext, { value: providedSuspenseFallback, children: [navigationEvents_1.unstable_navigationEvents.isEnabled() && isRouteType && hasRouteKey && ((0, jsx_runtime_1.jsx)(AnalyticsListeners, { navigation: navigation, screenId: route.key, route: route })), (0, jsx_runtime_1.jsxs)(zoom_transition_context_providers_1.ZoomTransitionTargetContextProvider, { route: route, children: [(0, jsx_runtime_1.jsx)(ZoomTransitionEnabler_1.ZoomTransitionEnabler, { route: route }), (0, jsx_runtime_1.jsx)(react_2.default.Suspense, { name: route ? `Route(${route.name})` : undefined, fallback: (0, jsx_runtime_1.jsx)(ResolvedSuspenseFallback, { route: value.contextKey, params: (route?.params ?? {}) }), children: (0, jsx_runtime_1.jsx)(WrappedScreenComponent, { ...props, 
                                     // Expose the template segment path, e.g. `(home)`, `[foo]`, `index`
                                     // the intention is to make it possible to deduce shared routes.
                                     segment: value.route }) })] })] }) }));
@@ -259,14 +260,14 @@ function getQualifiedRouteComponent(value) {
     qualifiedStore.set(value, BaseRoute);
     return BaseRoute;
 }
-function AnalyticsListeners({ navigation, screenId, }) {
+function AnalyticsListeners({ navigation, screenId, route, }) {
     const isFirstRenderRef = react_2.default.useRef(true);
     const hasBlurredRef = react_2.default.useRef(true);
     const routeInfo = (0, hooks_1.useCurrentRouteInfo)();
     if (isFirstRenderRef.current) {
         isFirstRenderRef.current = false;
-        if (routeInfo) {
-            navigationEvents_1.unstable_navigationEvents.emit('pageWillRender', {
+        if (routeInfo && (0, stack_1.isRoutePreloadedInStack)(navigation.getState(), route)) {
+            navigationEvents_1.unstable_navigationEvents.emit('pagePreloaded', {
                 pathname: routeInfo.pathname,
                 params: routeInfo.params,
                 screenId,
