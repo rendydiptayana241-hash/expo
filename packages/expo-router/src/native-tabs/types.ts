@@ -355,17 +355,16 @@ export interface OnTabChangeEventPayload {
   isNativeAction: boolean;
 }
 
-export interface NativeTabsViewProps
-  extends Omit<
-    InternalNativeTabsProps,
-    | 'labelStyle'
-    | 'iconColor'
-    | 'backgroundColor'
-    | 'badgeBackgroundColor'
-    | 'blurEffect'
-    | 'indicatorColor'
-    | 'badgeTextColor'
-  > {
+export interface NativeTabsViewProps extends Omit<
+  InternalNativeTabsProps,
+  | 'labelStyle'
+  | 'iconColor'
+  | 'backgroundColor'
+  | 'badgeBackgroundColor'
+  | 'blurEffect'
+  | 'indicatorColor'
+  | 'badgeTextColor'
+> {
   focusedIndex: number;
   /**
    * Provenance counter associated with the currently rendered `focusedIndex`.
